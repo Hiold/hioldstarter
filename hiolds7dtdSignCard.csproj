@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>hiolds7dtdSignCard</AssemblyName>
+    <RootNamespace>HioldMod</RootNamespace>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Mods\hiolds7dtdSignCard_funcs\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <NoStdLib>true</NoStdLib>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>bin-lib\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="mscorlib">
+      <HintPath>..\7dtd-binaries\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\7dtd-binaries\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.XML" />
+    <Reference Include="UnityEngine">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LogLibrary">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\LogLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\AssemblyInfo.cs" />
+    <Compile Include="src\API.cs" />
+    <Compile Include="src\ConfigTools\LoadSignCardPlayerConfig.cs" />
+    <Compile Include="src\ConfigTools\LoadSignCardMainConfig.cs" />
+    <Compile Include="src\ConfigTools\LoadSignCardInfoConfig.cs" />
+    <Compile Include="src\Serialize\CardAwordInfo.cs" />
+    <Compile Include="src\Serialize\ItemStackSerializable.cs" />
+    <Compile Include="src\Serialize\JsonUtils.cs" />
+    <Compile Include="src\UserTools\Auction.cs" />
+    <Compile Include="src\UserTools\ClientInfoUtils.cs" />
+    <Compile Include="src\UserTools\DeliverItemTools.cs" />
+    <Compile Include="src\UserTools\DesUtils.cs" />
+    <Compile Include="src\UserTools\HandleCommand.cs" />
+    <Compile Include="src\UserTools\HttpTools.cs" />
+    <Compile Include="src\UserTools\Inventory.cs" />
+    <Compile Include="src\UserTools\InvItem.cs" />
+    <Compile Include="src\UserTools\RemovecasinoCoin.cs" />
+    <Compile Include="src\UserTools\SignCardConfig.cs" />
+    <Compile Include="src\UserTools\StoreItem .cs" />
+    <Compile Include="src\UserTools\RemoveItem.cs" />
+    <Compile Include="src\UserTools\RemoveItemNew.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Content Include="bin-lib\Assembly-CSharp-firstpass.dll" />
+    <Content Include="bin-lib\Assembly-CSharp.dll" />
+    <Content Include="bin-lib\LogLibrary.dll" />
+    <Content Include="bin-lib\UnityEngine.CoreModule.dll" />
+    <Content Include="bin-lib\UnityEngine.dll" />
+    <Content Include="bin-lib\UnityEngine.ImageConversionModule.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ModInfo.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\SignCard\" />
+  </ItemGroup>
+</Project>
