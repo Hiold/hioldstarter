@@ -268,6 +268,7 @@ namespace ConfigTools
                 sw.WriteLine("<HioldSignCardModConfig>");
 
                 //物品分组信息
+                //默认
                 sw.WriteLine("    <Group name=\"default\">");
                 sw.WriteLine(string.Format("        <Award Name=\"{0}\" itemname=\"{1}\" itemquality=\"{2}\" itemcount=\"{3}\" />", "木头", "resourceWood", "0", "100"));
                 sw.WriteLine(string.Format("        <Award Name=\"{0}\" itemname=\"{1}\" itemquality=\"{2}\" itemcount=\"{3}\" />", "石头", "resourceRockSmall", "0", "100"));
@@ -275,9 +276,9 @@ namespace ConfigTools
                 sw.WriteLine("    </Group>");
 
 
-                //VIP月卡
                 //物品分组信息
-                sw.WriteLine("    <Group name=\"default\">");
+                //VIP
+                sw.WriteLine("    <Group name=\"vip\">");
                 sw.WriteLine(string.Format("        <Award Name=\"{0}\" itemname=\"{1}\" itemquality=\"{2}\" itemcount=\"{3}\" />", "锻铁", "resourceForgedIron", "0", "100"));
                 sw.WriteLine(string.Format("        <Award Name=\"{0}\" itemname=\"{1}\" itemquality=\"{2}\" itemcount=\"{3}\" />", "锻钢", "resourceForgedSteel", "0", "100"));
                 sw.WriteLine("        <!--Name属性非必须,itemname为物品名，itemquality为物品品质（无品质物品请写0），itemcount为物品数量-->");
