@@ -1,4 +1,5 @@
 ﻿using HioldMod;
+using HioldMod.src.Serialize;
 using HioldMod.src.UserTools;
 using System;
 using System.Collections.Concurrent;
@@ -14,7 +15,7 @@ namespace ConfigTools
         public const string version = "19.3.2";
         public static string Server_Response_Name = "[FFCC00]HioldSignCardMod";
         public static string Chat_Response_Color = "[00FF00]";
-        private const string configFile = "ActionKillAwardConfig.xml";
+        private const string configFile = "SignCardMainrConfig.xml";
         public static string configFilePath = string.Format("{0}/{1}", API.ConfigPath, configFile);
         public static FileSystemWatcher fileWatcher = new FileSystemWatcher(API.ConfigPath, configFile);
         public static string OldXmlDirectory = "";
@@ -29,10 +30,10 @@ namespace ConfigTools
         public static void LoadXml()
         {
             //清空原有数据
-            SignCardConfig.awrodCardList.Clear();
+            SignCardConfig.playerGroup.Clear();
             //
             Log.Out("---------------------------------------------------------------");
-            Log.Out("[HioldSignCardMod] 签到月卡MOD----验证配置文件 & 保存新Entity");
+            Log.Out("[HioldSignCardMod] 签到月卡MOD主配置----验证配置文件 & 保存新Entity");
             Log.Out("---------------------------------------------------------------");
             if (!Utils.FileExists(configFilePath))
             {
@@ -51,210 +52,73 @@ namespace ConfigTools
             XmlNode _XmlNode = xmlDoc.DocumentElement;
             foreach (XmlNode childNode in _XmlNode.ChildNodes)
             {
-                //是否开启
+                //解析配置数据
                 if (childNode.Name == "Enable")
                 {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
+                    XmlElement _inNode = (XmlElement)childNode;
+                    if (!_inNode.HasAttribute("value"))
                     {
-                        Log.Warning(string.Format("[HioldSignCardMod] Enable， 缺失'Enable' 属性: {0}", _line.OuterXml));
+                        Log.Warning(string.Format("[HioldSignCardMod] Enable标签缺少value属性"));
                         continue;
+                    }
+
+                    if (_inNode.NodeType == XmlNodeType.Comment)
+                    {
+                        continue;
+                    }
+                    if (_inNode.NodeType != XmlNodeType.Element)
+                    {
+                        Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", _inNode.OuterXml));
+                        continue;
+                    }
+
+                    if (_inNode.HasAttribute("value"))
+                    {
+                        //检测到为有效任务配置
+                        if (!bool.TryParse(_inNode.GetAttribute("value"), out SignCardConfig.IsEnable))
+                        {
+                            Log.Warning(string.Format("[HioldSignCardMod] 未开启签到奖励"));
+                        }
                     }
                     else
                     {
-                        if (!bool.TryParse(_line.GetAttribute("value"), out KillConfig.IsEnable))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] Enable配置有误"));
-                        }
+                        Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性"));
                     }
-                }
 
-                //默认僵尸击杀配置
-                if (childNode.Name == "DefaultZombie")
+
+                }
+                //解析触发指令
+                if (childNode.Name == "Command")
                 {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
+                    XmlElement _inNode = (XmlElement)childNode;
+                    if (!_inNode.HasAttribute("value"))
                     {
-                        Log.Warning(string.Format("[HioldSignCardMod] DefaultZombie， 缺失'DefaultZombie' 属性: {0}", _line.OuterXml));
+                        Log.Warning(string.Format("[HioldSignCardMod] Enable标签缺少value属性"));
                         continue;
+                    }
+
+                    if (_inNode.NodeType == XmlNodeType.Comment)
+                    {
+                        continue;
+                    }
+                    if (_inNode.NodeType != XmlNodeType.Element)
+                    {
+                        Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", _inNode.OuterXml));
+                        continue;
+                    }
+
+                    if (_inNode.HasAttribute("value"))
+                    {
+                        //检测到为有效任务配置
+                        SignCardConfig.trigerCommand = _inNode.GetAttribute("value");
                     }
                     else
                     {
-                        if (!int.TryParse(_line.GetAttribute("value"), out KillConfig.defaultZombie))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] DefaultZombie配置有误"));
-                        }
+                        Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性"));
                     }
+
+
                 }
-
-                //默认动物击杀配置
-                if (childNode.Name == "DefaultAnimal")
-                {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
-                    {
-                        Log.Warning(string.Format("[HioldSignCardMod] DefaultAnimal， 缺失'DefaultAnimal' 属性: {0}", _line.OuterXml));
-                        continue;
-                    }
-                    else
-                    {
-                        if (!int.TryParse(_line.GetAttribute("value"), out KillConfig.defaultAnimal))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] DefaultAnimal配置有误"));
-                        }
-                    }
-                }
-
-                //是否开启僵尸击杀奖励
-                if (childNode.Name == "ZombieEnable")
-                {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
-                    {
-                        Log.Warning(string.Format("[HioldSignCardMod] ZombieEnable， 缺失'ZombieEnable' 属性: {0}", _line.OuterXml));
-                        continue;
-                    }
-                    else
-                    {
-                        if (!bool.TryParse(_line.GetAttribute("value"), out KillConfig.IsZombleEnable))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] ZombieEnable配置有误"));
-                        }
-                    }
-                }
-
-                //是否开启动物击杀奖励
-                if (childNode.Name == "AnimalEnable")
-                {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
-                    {
-                        Log.Warning(string.Format("[HioldSignCardMod] AnimalEnable， 缺失'AnimalEnable' 属性: {0}", _line.OuterXml));
-                        continue;
-                    }
-                    else
-                    {
-                        if (!bool.TryParse(_line.GetAttribute("value"), out KillConfig.IsAnimalEnable))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] AnimalEnable配置有误"));
-                        }
-                    }
-                }
-
-
-                //是否开启血月双倍
-                if (childNode.Name == "BloodMoonDoubleEnable")
-                {
-                    XmlElement _line = (XmlElement)childNode;
-                    if (!_line.HasAttribute("value"))
-                    {
-                        Log.Warning(string.Format("[HioldSignCardMod] BloodMoonDoubleEnable， 缺失'BloodMoonDoubleEnable' 属性: {0}", _line.OuterXml));
-                        continue;
-                    }
-                    else
-                    {
-                        if (!bool.TryParse(_line.GetAttribute("value"), out KillConfig.IsBloodMoonDoubleEnable))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] BloodMoonDoubleEnable配置有误"));
-                        }
-                    }
-                }
-
-
-                //僵尸击杀奖励列表
-                if (childNode.Name == "ZombleKillAward")
-                {
-                    foreach (XmlNode subChild in childNode.ChildNodes)
-                    {
-                        if (subChild.NodeType == XmlNodeType.Comment)
-                        {
-                            continue;
-                        }
-                        if (subChild.NodeType != XmlNodeType.Element)
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", subChild.OuterXml));
-                            continue;
-                        }
-                        XmlElement _line = (XmlElement)subChild;
-                        //奖励量
-                        if (!_line.HasAttribute("enable"))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] value， 缺失'enable' 属性: {0}", subChild.OuterXml));
-                            continue;
-                        }
-                        else
-                        {
-                            if (_line.HasAttribute("id") && _line.HasAttribute("value") && _line.HasAttribute("enable"))
-                            {
-                                //检测到为有效任务配置
-                                if (_line.GetAttribute("enable").Equals("True"))
-                                {
-                                    if (!int.TryParse(_line.GetAttribute("value"), out int tmp))
-                                    {
-                                        KillConfig.zombieAward.Add(_line.GetAttribute("id"), tmp);
-                                    }
-                                    else
-                                    {
-                                        Log.Warning(string.Format("[HioldSignCardMod] 击杀奖励配置有误,value值异常"));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                Log.Warning(string.Format("[HioldSignCardMod] 击杀奖励配置有误,缺少属性"));
-                            }
-                        }
-                    }
-                }
-
-
-
-                //动物击杀奖励列表
-                if (childNode.Name == "AnimalKillAward")
-                {
-                    foreach (XmlNode subChild in childNode.ChildNodes)
-                    {
-                        if (subChild.NodeType == XmlNodeType.Comment)
-                        {
-                            continue;
-                        }
-                        if (subChild.NodeType != XmlNodeType.Element)
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", subChild.OuterXml));
-                            continue;
-                        }
-                        XmlElement _line = (XmlElement)subChild;
-                        //奖励量
-                        if (!_line.HasAttribute("enable"))
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] value， 缺失'enable' 属性: {0}", subChild.OuterXml));
-                            continue;
-                        }
-                        else
-                        {
-                            if (_line.HasAttribute("id") && _line.HasAttribute("value") && _line.HasAttribute("enable"))
-                            {
-                                //检测到为有效任务配置
-                                if (_line.GetAttribute("enable").Equals("True"))
-                                {
-                                    if (!int.TryParse(_line.GetAttribute("value"), out int tmp))
-                                    {
-                                        KillConfig.animalAward.Add(_line.GetAttribute("id"), tmp);
-                                    }
-                                    else
-                                    {
-                                        Log.Warning(string.Format("[HioldSignCardMod] 击杀奖励配置有误,value值异常"));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                Log.Warning(string.Format("[HioldSignCardMod] 击杀奖励配置有误,缺少属性"));
-                            }
-                        }
-                    }
-                }
-
 
             }
         }
@@ -266,38 +130,11 @@ namespace ConfigTools
             {
                 sw.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 sw.WriteLine("<HioldSignCardModConfig>");
-                //是否开启
-                sw.WriteLine(string.Format("    <Enable value=\"{0}\" />", "False"));
-                sw.WriteLine("    <!--是否开启击杀奖励 True/False-->");
-                //僵尸默认奖励值
-                sw.WriteLine(string.Format("    <DefaultZombie value=\"{0}\" />", "0"));
-                sw.WriteLine("    <!--默认击杀奖励积分(未配置奖励的击杀,发放这个配置的数量)-->");
-                //动物默认奖励值
-                sw.WriteLine(string.Format("    <DefaultAnimal value=\"{0}\" />", "0"));
-                sw.WriteLine("    <!--默认击杀奖励积分(未配置奖励的击杀,发放这个配置的数量)-->");
-                //是否开启僵尸击杀奖励
-                sw.WriteLine(string.Format("    <ZombieEnable value=\"{0}\" />", "False"));
-                sw.WriteLine("    <!--是否开启僵尸击杀奖励-->");
-                //是否开启动物击杀奖励
-                sw.WriteLine(string.Format("    <AnimalEnable value=\"{0}\" />", "False"));
-                sw.WriteLine("    <!--是否开启动物击杀奖励-->");
-                //是否开启血月双倍奖励
-                sw.WriteLine(string.Format("    <BloodMoonDoubleEnable value=\"{0}\" />", "False"));
-                sw.WriteLine("    <!--是否开血月双倍模式-->");
 
-                //僵尸击杀
-                sw.WriteLine("    <ZombleKillAward>");
-                sw.WriteLine(string.Format("        <ZombieKill Name=\"{0}\" id=\"{1}\" value=\"{2}\" enable=\"{3}\" />", "测试僵尸类型", "testzomble", "1", "False"));
-                sw.WriteLine("        <!--Name属性非必须,id为僵尸类型，value为发放数量,enable为是否开启(若设置成False则无效,使用Default设置的默认值进行发放)-->");
-                sw.WriteLine("    </ZombleKillAward>");
-
-
-
-                //动物击杀
-                sw.WriteLine("    <AnimalKillAward>");
-                sw.WriteLine(string.Format("        <AnimalKill Name=\"{0}\" id=\"{1}\" value=\"{2}\" enable=\"{3}\" />", "测试动物类型", "testAnimal", "1", "False"));
-                sw.WriteLine("        <!--Name属性非必须,id为动物类型，value为发放数量,enable为是否开启(若设置成False则无效,使用Default设置的默认值进行发放)-->");
-                sw.WriteLine("    </AnimalKillAward>");
+                sw.WriteLine("    <Enable value=\"True\" />");
+                sw.WriteLine("    <!--value属性必须，此为奖励总开关True开启，False关闭-->");
+                sw.WriteLine("    <Command value=\"/sign\" />");
+                sw.WriteLine("    <!--触发指令配置（默认配置玩家输入/sign服务器执行签到处理）-->");
 
                 //配置文件结束
                 sw.WriteLine("</HioldSignCardModConfig>");
@@ -331,11 +168,11 @@ namespace ConfigTools
                         XmlDocument _oldXml = new XmlDocument();
                         try
                         {
-                            _oldXml.Load(OldXmlDirectory + "/ActionMainConfig.xml");
+                            _oldXml.Load(OldXmlDirectory + "/SignCardMainrConfig.xml");
                         }
                         catch (XmlException e)
                         {
-                            Log.Error(string.Format("[HioldSignCardMod] 加载错误 {0}: {1}", OldXmlDirectory + "/ActionMainConfig.xml", e.Message));
+                            Log.Error(string.Format("[HioldSignCardMod] 加载错误 {0}: {1}", OldXmlDirectory + "/SignCardMainrConfig.xml", e.Message));
                             return;
                         }
                         XmlNode _oldXmlNode = _oldXml.DocumentElement;

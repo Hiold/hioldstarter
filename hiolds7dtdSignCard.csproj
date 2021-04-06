@@ -21,9 +21,6 @@
     <NoStdLib>true</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>bin-lib\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -67,19 +64,8 @@
     <Compile Include="src\Serialize\CardAwordInfo.cs" />
     <Compile Include="src\Serialize\ItemStackSerializable.cs" />
     <Compile Include="src\Serialize\JsonUtils.cs" />
-    <Compile Include="src\UserTools\Auction.cs" />
-    <Compile Include="src\UserTools\ClientInfoUtils.cs" />
-    <Compile Include="src\UserTools\DeliverItemTools.cs" />
-    <Compile Include="src\UserTools\DesUtils.cs" />
-    <Compile Include="src\UserTools\HandleCommand.cs" />
-    <Compile Include="src\UserTools\HttpTools.cs" />
-    <Compile Include="src\UserTools\Inventory.cs" />
-    <Compile Include="src\UserTools\InvItem.cs" />
-    <Compile Include="src\UserTools\RemovecasinoCoin.cs" />
     <Compile Include="src\UserTools\SignCardConfig.cs" />
-    <Compile Include="src\UserTools\StoreItem .cs" />
-    <Compile Include="src\UserTools\RemoveItem.cs" />
-    <Compile Include="src\UserTools\RemoveItemNew.cs" />
+    <Compile Include="src\UserTools\SignCardHandler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
