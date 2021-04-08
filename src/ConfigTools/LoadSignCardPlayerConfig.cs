@@ -100,9 +100,11 @@ namespace ConfigTools
                 sw.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 sw.WriteLine("<HioldSignCardModConfig>");
 
-                sw.WriteLine("    <Player name=\"海鸥Design\" steamid=\"27099982312311221123\" group=\"default\" enable=\"True\" />");
-                sw.WriteLine("    <Player name=\"海鸥Program\" steamid=\"27099982312311222222\" group=\"vip\" enable=\"True\" />");
+                sw.WriteLine("    <Player name=\"海鸥Design\" steamid=\"27099982312311221123\" group=\"default\" type=\"single\" enable=\"True\" />");
+                sw.WriteLine("    <Player name=\"海鸥Program\" steamid=\"27099982312311222222\" group=\"vip\" type=\"single\" enable=\"True\" />");
+                sw.WriteLine("    <Player name=\"海鸥Release\" steamid=\"27099982312311222222\" group=\"vipWeek\" type=\"multi\" enable=\"True\" startdate=\"20210408\" />");
                 sw.WriteLine("    <!--Name属性非必须用于区分用户，steamid为玩家steamid，group为发放奖励列表（对应SignCardInfoConfig.xml里Group节点的name属性），enable为是否启用该用户配置（True/False）,若为False调用default-->");
+                sw.WriteLine("    <!--type为single时发放签到奖励(每天一样的物品)。 type为multi时发放每天单独配置奖励，type为multi时必须配置生效日期(从哪天开始发放奖励)-->");
 
                 //配置文件结束
                 sw.WriteLine("</HioldSignCardModConfig>");

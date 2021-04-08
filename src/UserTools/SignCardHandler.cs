@@ -16,11 +16,6 @@ namespace HioldMod.src.UserTools
 
         public static void PlayerSign(ClientInfo _cInfo)
         {
-            //检查文件夹
-            if (!Directory.Exists(string.Format("{0}/Logs/", API.ConfigPath)))
-            {
-                Directory.CreateDirectory(string.Format("{0}/Logs/", API.ConfigPath));
-            }
 
             //初始化当日签到信息
             string fileTodaySisn = string.Format("SignUser_{0}.txt", DateTime.Today.ToString("yyyy-MM-dd"));
@@ -129,11 +124,6 @@ namespace HioldMod.src.UserTools
                 Log.Out("配置错误无法获取到奖励信息");
                 return;
             }
-
-
-
-
-
         }
 
         //读取文件

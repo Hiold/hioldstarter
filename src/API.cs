@@ -75,6 +75,12 @@ namespace HioldMod
             //加载玩家配置信息
             LoadSignCardPlayerConfig.Load();
 
+            //检查文件夹
+            if (!Directory.Exists(string.Format("{0}/Logs/", API.ConfigPath)))
+            {
+                Directory.CreateDirectory(string.Format("{0}/Logs/", API.ConfigPath));
+            }
+
         }
     }
 }

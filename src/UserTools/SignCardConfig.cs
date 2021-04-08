@@ -10,12 +10,18 @@ namespace HioldMod.src.UserTools
         //配置项
         //是否开启
         public static bool IsEnable;
-        //奖励列表
-        public static ConcurrentDictionary<string, List<CardAwordInfo>> awrodCardList = new ConcurrentDictionary<string, List<CardAwordInfo>>();
+        //奖励信息
+        public static ConcurrentDictionary<string, List<List<CardAwordInfo>>> awrodCardList = new ConcurrentDictionary<string, List<List<CardAwordInfo>>>();
         //用户分组列表
-        public static ConcurrentDictionary<string, string> playerGroup = new ConcurrentDictionary<string, string>();
+        public static ConcurrentDictionary<string, PlayerGroup> playerGroup = new ConcurrentDictionary<string, PlayerGroup>();
         //触发奖励机制的指令
         public static string trigerCommand;
 
+    }
+
+    public class PlayerGroup
+    {
+        public string group { get; set; }
+        public string type { get; set; }
     }
 }

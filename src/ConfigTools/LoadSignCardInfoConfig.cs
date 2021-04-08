@@ -56,6 +56,7 @@ namespace ConfigTools
                 if (childNode.Name == "Group")
                 {
                     XmlElement _inNode = (XmlElement)childNode;
+
                     if (!_inNode.HasAttribute("name"))
                     {
                         Log.Warning(string.Format("[HioldSignCardMod] Group标签缺少name属性"));
@@ -64,62 +65,155 @@ namespace ConfigTools
 
                     string groupName = _inNode.GetAttribute("name");
                     //奖励列表
-                    List<CardAwordInfo> AwordList = new List<CardAwordInfo>();
-
+                    List<List<CardAwordInfo>> AwordList = new List<List<CardAwordInfo>>();
+                    //初始化奖励列表数据
+                    //List<CardAwordInfo> cardAwordInfos = new List<CardAwordInfo>();
                     foreach (XmlNode subChild in childNode.ChildNodes)
                     {
-                        if (subChild.NodeType == XmlNodeType.Comment)
+                        //初始化集合
+                        if (AwordList.Count == 0)
                         {
-                            continue;
+                            AwordList.Add(new List<CardAwordInfo>());
                         }
-                        if (subChild.NodeType != XmlNodeType.Element)
-                        {
-                            Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", subChild.OuterXml));
-                            continue;
-                        }
+
                         XmlElement _line = (XmlElement)subChild;
-                        if (_line.HasAttribute("type") && _line.HasAttribute("enable"))
+                        //判断类型
+                        if (_line.Name.Equals("Award"))
                         {
-                            //检测到为有效任务配置
-                            if (_line.GetAttribute("enable").Equals("True"))
+                            //每日重复奖励
+                            if (subChild.NodeType == XmlNodeType.Comment)
                             {
-                                //判断奖励类型
-                                if (_line.GetAttribute("type").Equals("item"))
+                                continue;
+                            }
+                            if (subChild.NodeType != XmlNodeType.Element)
+                            {
+                                Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", subChild.OuterXml));
+                                continue;
+                            }
+
+                            if (_line.HasAttribute("type") && _line.HasAttribute("enable"))
+                            {
+                                //检测到为有效任务配置
+                                if (_line.GetAttribute("enable").Equals("True"))
                                 {
-                                    //string awardtype, string command, string itemname, int itemquality, int itemcount
-                                    //转换数据类型
-                                    if (int.TryParse(_line.GetAttribute("itemquality"), out int itemquality))
+                                    //判断奖励类型
+                                    if (_line.GetAttribute("type").Equals("item"))
                                     {
-                                        if (int.TryParse(_line.GetAttribute("itemcount"), out int itemcount))
+                                        //string awardtype, string command, string itemname, int itemquality, int itemcount
+                                        //转换数据类型
+                                        if (int.TryParse(_line.GetAttribute("itemquality"), out int itemquality))
                                         {
-                                            //转换成功配置无异常
-                                            //物品奖励添加到集合中
-                                            AwordList.Add(new CardAwordInfo(_line.GetAttribute("type"), null, _line.GetAttribute("itemname"), itemquality, itemcount));
+                                            if (int.TryParse(_line.GetAttribute("itemcount"), out int itemcount))
+                                            {
+                                                //转换成功配置无异常
+                                                //物品奖励添加到集合中
+                                                //cardAwordInfos.Add();
+                                                AwordList[0].Add(new CardAwordInfo(_line.GetAttribute("type"), null, _line.GetAttribute("itemname"), itemquality, itemcount));
+                                            }
+                                            else
+                                            {
+                                                Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemcount"));
+                                                continue;
+                                            }
+
                                         }
                                         else
                                         {
-                                            Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemcount"));
+                                            Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemquality"));
                                             continue;
                                         }
 
                                     }
-                                    else
+                                    else if (_line.GetAttribute("type").Equals("command"))
                                     {
-                                        Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemquality"));
-                                        continue;
+                                        //物品奖励添加到集合中
+                                        //cardAwordInfos.Add(new CardAwordInfo(_line.GetAttribute("type"), _line.GetAttribute("command"), null, 0, 0));
+                                        AwordList[0].Add(new CardAwordInfo(_line.GetAttribute("type"), _line.GetAttribute("command"), null, 0, 0));
                                     }
-
-                                }
-                                else if (_line.GetAttribute("type").Equals("command"))
-                                {
-                                    //物品奖励添加到集合中
-                                    AwordList.Add(new CardAwordInfo(_line.GetAttribute("type"), _line.GetAttribute("command"), null, 0, 0));
                                 }
                             }
+                            else
+                            {
+                                Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性"));
+                            }
+                            //处理单个奖励完毕
                         }
-                        else
+                        else if (_line.Name.Equals("Day"))
                         {
-                            Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性"));
+                            //处理每日不同
+
+
+                            //初始化List
+                            List<CardAwordInfo> cardAwordInfos = new List<CardAwordInfo>();
+                            foreach (XmlNode _lineDay in _line.ChildNodes)
+                            {
+                                XmlElement _dayline = (XmlElement)_lineDay;
+                                //每日重复奖励
+                                if (subChild.NodeType == XmlNodeType.Comment)
+                                {
+                                    continue;
+                                }
+                                if (subChild.NodeType != XmlNodeType.Element)
+                                {
+                                    Log.Warning(string.Format("[HioldSignCardMod] 在HioldSignCardMod存在不支持的 section: {0}", subChild.OuterXml));
+                                    continue;
+                                }
+
+                                if (_dayline.HasAttribute("type") && _dayline.HasAttribute("enable"))
+                                {
+                                    //检测到为有效任务配置
+                                    if (_dayline.GetAttribute("enable").Equals("True"))
+                                    {
+                                        //判断奖励类型
+                                        if (_dayline.GetAttribute("type").Equals("item"))
+                                        {
+                                            //string awardtype, string command, string itemname, int itemquality, int itemcount
+                                            //转换数据类型
+                                            if (int.TryParse(_dayline.GetAttribute("itemquality"), out int itemquality))
+                                            {
+                                                if (int.TryParse(_dayline.GetAttribute("itemcount"), out int itemcount))
+                                                {
+                                                    //转换成功配置无异常
+                                                    //物品奖励添加到集合中
+                                                    cardAwordInfos.Add(new CardAwordInfo(_dayline.GetAttribute("type"), null, _dayline.GetAttribute("itemname"), itemquality, itemcount));
+                                                    //AwordList.Add(cardAwordInfos);
+                                                }
+                                                else
+                                                {
+                                                    Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemcount"));
+                                                    continue;
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性itemquality"));
+                                                continue;
+                                            }
+
+                                        }
+                                        else if (_dayline.GetAttribute("type").Equals("command"))
+                                        {
+                                            //物品奖励添加到集合中
+                                            cardAwordInfos.Add(new CardAwordInfo(_dayline.GetAttribute("type"), _dayline.GetAttribute("command"), null, 0, 0));
+                                            //AwordList.Add(cardAwordInfos);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Warning(string.Format("[HioldSignCardMod] 签到月卡配置有误,缺少属性"));
+                                }
+                                //处理单个奖励完毕
+                            }
+                            AwordList.Add(cardAwordInfos);
+
+
+
+
+
+
+
                         }
                     }
                     //处理完毕添加集合进nama映射中
@@ -139,20 +233,66 @@ namespace ConfigTools
                 //物品分组信息
                 //默认
                 sw.WriteLine("    <Group name=\"default\">");
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" itemname=\"{2}\" itemquality=\"{3}\" itemcount=\"{4}\" enable=\"{5}\" />", "木头", "item", "resourceWood", "0", "100", "True"));
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" itemname=\"{2}\" itemquality=\"{3}\" itemcount=\"{4}\" enable=\"{5}\" />", "石头", "item", "resourceRockSmall", "0", "100", "True"));
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" command=\"{2}\" enable=\"{3}\" />", "命令", "command", "sayplayer {username} [00ff00]成功领取", "true"));
+                sw.WriteLine("        <Award name=\"木头\" type=\"item\" itemname=\"resourceWood\" itemquality=\"0\" itemcount=\"100\" enable=\"True\" />");
+                sw.WriteLine("        <Award name=\"石头\" type=\"item\" itemname=\"resourceRockSmall\" itemquality=\"0\" itemcount=\"100\" enable=\"True\" />");
+                sw.WriteLine("        <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取\" enable=\"True\" />");
                 sw.WriteLine("        <!--Name属性非必须，Type为奖励类型(item:物品 command:执行命令。{username}填充用户名，{usersteamid}填充Steam ID)，itemname为物品名，itemquality为物品品质（无品质物品请写0），itemcount为物品数量，enable为是否可用（True可用正常发放，False停用不发放）-->");
                 sw.WriteLine("    </Group>");
-
 
                 //物品分组信息
                 //VIP
                 sw.WriteLine("    <Group name=\"vip\">");
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" itemname=\"{2}\" itemquality=\"{3}\" itemcount=\"{4}\" enable=\"{5}\" />", "锻铁", "item", "resourceForgedIron", "0", "100", "true"));
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" itemname=\"{2}\" itemquality=\"{3}\" itemcount=\"{4}\" enable=\"{5}\" />", "锻钢", "item", "resourceForgedSteel", "0", "100", "true"));
-                sw.WriteLine(string.Format("        <Award name=\"{0}\" type=\"{1}\" command=\"{2}\" enable=\"{3}\" />", "命令", "command", "sayplayer {username} [00ff00]成功领取VIP礼包", "true"));
-                sw.WriteLine("        <!--Name属性非必须，Type为奖励类型(item:物品 command:执行命令。{username}填充用户名，{usersteamid}填充Steam ID)，itemname为物品名，itemquality为物品品质（无品质物品请写0），itemcount为物品数量，enable为是否可用（True可用正常发放，False停用不发放）-->");
+                sw.WriteLine("        <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"100\" enable=\"True\" />");
+                sw.WriteLine("        <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"100\" enable=\"True\" />");
+                sw.WriteLine("        <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP礼包\" enable=\"True\" />");
+                sw.WriteLine("    </Group>");
+                sw.WriteLine("    <!--以上是签到默认奖励示例配置(每天领取到的物品一样)-->");
+                sw.WriteLine("    <!--以下是周卡配置示例(为签到的每天配置不同物品)-->");
+
+                //周卡配置
+                sw.WriteLine("    <Group name=\"vipWeek\">");
+                sw.WriteLine("        <Day value=\"1\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"1\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"1\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第一天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"2\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"2\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"2\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第二天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"3\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"3\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"3\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第三天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"4\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"4\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"4\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第四天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"5\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"5\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"5\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第五天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"6\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"6\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"6\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第六天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
+                sw.WriteLine("        <Day value=\"7\">");
+                sw.WriteLine("            <!--value值为对应天数,请注意不要重复,否则可能出现覆盖问题-->");
+                sw.WriteLine("            <Award name=\"锻铁\" type=\"item\" itemname=\"resourceForgedIron\" itemquality=\"0\" itemcount=\"7\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"锻钢\" type=\"item\" itemname=\"resourceForgedSteel\" itemquality=\"0\" itemcount=\"7\" enable=\"True\" />");
+                sw.WriteLine("            <Award name=\"命令\" type=\"command\" command=\"sayplayer {username} [00ff00]成功领取VIP周卡第七天奖励\" enable=\"True\" />");
+                sw.WriteLine("        </Day");
                 sw.WriteLine("    </Group>");
 
 
