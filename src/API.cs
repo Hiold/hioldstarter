@@ -1,86 +1,195 @@
-using HioldMod.src.UserTools;
-using ConfigTools;
 using System.IO;
-using System.Collections.Generic;
-using ServerTools;
 using System;
+using System.Reflection;
+using System.Collections.Generic;
+using HioldMod.src.UserTools;
+using System.Net;
 
 namespace HioldMod
 {
     public class API : IModApi
     {
-        //ÓÎÏ·Â·¾¶
-        public static string GamePath = Directory.GetCurrentDirectory();
-        //configÂ·¾¶
-        public static string ConfigPath = string.Format("{0}/Mods/hiolds7dtdSignCard_funcs/config/", GamePath);
-
+        public static string AssemblyPath = string.Format("{0}/", getModDir());
+        private static Assembly MainAssembly;
+        private static IModApi ApiInstance;
         public void InitMod()
         {
+            string version = HttpTools.HttpPost("http://qc.hiold.net:8081/hioldapi/version.json");
+            Log.Out("[HIOLD] è¿œç¨‹versionä¿¡æ¯ï¼š{0}", version);
+            Dictionary<string, string> versionRemote = HttpTools.stringToDic(version);
+            //æ˜¯å¦æ‰§è¡Œæ›´æ–°
+            bool modhasUpdate = false;
+            bool apihasUpdate = false;
+            //è¯»å–æœ¬åœ°æ–‡ä»¶
+            string txt = "";
+            try
+            {
+                StreamReader sr = new StreamReader(@AssemblyPath + "version.json");
+                while (!sr.EndOfStream)
+                {
+                    string str = sr.ReadLine();
+                    txt += str;
+                }
+                sr.Close();
+            }
+            catch (Exception e)
+            {
+                Log.Out("[HIOLD] æ²¡æœ‰å‘ç°versionä¿¡æ¯ï¼Œæ‰§è¡Œä¸‹è½½");
+            }
+            //æ ¡éªŒæœ¬åœ°æ–‡ä»¶
+            //æ²¡æœ‰æ£€æµ‹åˆ°æ–‡ä»¶ï¼Œå†™å…¥æ–°æ–‡ä»¶ å¹¶æ‰§è¡Œæ›´æ–°
+            if (txt.Equals("") || txt == null)
+            {
+                modhasUpdate = true;
+                apihasUpdate = true;
+                //å†™å…¥æ–‡ä»¶
+                using (StreamWriter sw = new StreamWriter(@AssemblyPath + "version.json", true))
+                {
+                    sw.WriteLine(version);
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
 
-            //¼àÌı·şÎñÆ÷³õÊ¼»¯³É¹¦ÊÂ¼ş
-            //ModEvents.GameStartDone.RegisterHandler (GameAwake);
-            //¼àÌı·şÎñÆ÷¹Ø±Õ³É¹¦ÊÂ¼ş
-            //ModEvents.GameShutdown.RegisterHandler (GameShutdown);
-            //¼àÌı±£´æÍê¼ÙÊı¾İÊÂ¼ş
-            //ModEvents.SavePlayerData.RegisterHandler(SavePlayerData);
-            //¼àÌıÍæ¼ÒspawnÊÂ¼ş
-            //ModEvents.PlayerSpawning.RegisterHandler (PlayerSpawning);
-            //¼àÌıÍæ¼Ò¶Ï¿ªÁ¬½ÓÊÂ¼ş
-            //ModEvents.PlayerDisconnected.RegisterHandler (PlayerDisconnected);
-            //¼àÌıÍæ¼ÒÔÚÊÀ½çspawnÊÂ¼ş
-            //ModEvents.PlayerSpawnedInWorld.RegisterHandler (PlayerSpawned);
-            //¼àÌıÍæ¼Ò·¢ËÍÁÄÌìĞÅÏ¢ÊÂ¼ş
-            ModEvents.ChatMessage.RegisterHandler(ChatMessage);
-            //ModEvents.SavePlayerData.RegisterHandler(SavePlayerData);
-            ModEvents.GameStartDone.RegisterHandler(GameStartDone);
+            //æ²¡æœ‰è·å–åˆ°æ›´æ–°ä¿¡æ¯ä¸æ‰§è¡Œæ›´æ–°
+            if (versionRemote.Count <= 0)
+            {
+                modhasUpdate = false;
+                apihasUpdate = false;
+            }
 
-            //»÷É±´¦Àí
-            //ModEvents.EntityKilled.RegisterHandler(EntityKilled);
+            Dictionary<string, string> versionLocal = HttpTools.stringToDic(txt);
+            //åˆ¤æ–­ç‰ˆæœ¬æƒ…å†µ
+            if (versionRemote.Count > 0 && versionLocal.Count > 0)
+            {
+                //
+                if (versionRemote.TryGetValue("modversion", out string remoteModVersion))
+                {
+                    if (versionLocal.TryGetValue("modversion", out string localModVersion))
+                    {
+                        if (remoteModVersion.Equals(localModVersion))
+                        {
+                            modhasUpdate = false;
+                        }
+                        else
+                        {
+                            modhasUpdate = true;
+                        }
+                    }
+                }
+
+                if (versionRemote.TryGetValue("apiversion", out string remoteAPIVersion))
+                {
+                    if (versionLocal.TryGetValue("apiversion", out string localAPIVersion))
+                    {
+                        if (remoteAPIVersion.Equals(localAPIVersion))
+                        {
+                            apihasUpdate = false;
+                        }
+                        else
+                        {
+                            apihasUpdate = true;
+                        }
+                    }
+                }
+            }
+            //ä¸‹è½½dll
+            if (modhasUpdate)
+            {
+                Log.Out("[HIOLD] æ£€æµ‹åˆ°æ›´æ–°modæ›´æ–°ï¼Œæ­£åœ¨ä¸‹è½½");
+                //è¦†ç›–æ—§æ–‡ä»¶
+                if (DownloadFile("http://qc.hiold.net:8081/hioldapi/main.bin", AssemblyPath + "main.bin.new"))
+                {
+                    File.Delete(AssemblyPath + "main.bin");
+                    File.Copy(AssemblyPath + "main.bin.new", AssemblyPath + "main.bin");
+                    File.Delete(AssemblyPath + "main.bin.new");
+                }
+            }
+            else
+            {
+                Log.Out("[HIOLD] modå·²ä¸ºæœ€æ–°ï¼Œä¸å†æ›´æ–°");
+            }
+            //ä¸‹è½½api
+            if (apihasUpdate)
+            {
+                Log.Out("[HIOLD] æ£€æµ‹åˆ°æ›´æ–°apiæ›´æ–°ï¼Œæ­£åœ¨ä¸‹è½½");
+                if (DownloadFile("http://qc.hiold.net:8081/hioldapi/api.bin", AssemblyPath + "api.bin.new"))
+                {
+                    File.Delete(AssemblyPath + "api.bin");
+                    File.Copy(AssemblyPath + "api.bin.new", AssemblyPath + "api.bin");
+                    File.Delete(AssemblyPath + "api.bin.new");
+                }
+            }
+            else
+            {
+                Log.Out("[HIOLD] apiå·²ä¸ºæœ€æ–°ï¼Œä¸å†æ›´æ–°");
+            }
 
 
+
+
+
+            //èµ‹å€¼ä¸»æ–‡ä»¶è¿›è¡ŒåŠ è½½
+            File.Delete(AssemblyPath + "main.dlc");
+            File.Copy(AssemblyPath + "main.bin", AssemblyPath + "main.dlc");
+            //åå°„è·å–æ•°æ®
+            LoadAssembly(AssemblyPath + "main.dlc");
         }
 
-        public bool ChatMessage(ClientInfo _cInfo, EChatType _type, int _senderId, string _msg, string _mainName,
-            bool _localizeMain, List<int> _recipientEntityIds)
+        //åŠ è½½mod
+        public static void LoadAssembly(string _path)
         {
-            //¼àÌı[/hiold]ÃüÁî
-            if (!string.IsNullOrEmpty(_msg) && _msg.EqualsCaseInsensitive(SignCardConfig.trigerCommand))
+            Log.Out("[HIOLD] æ­£åœ¨è½½å…¥MOD , åˆ›å»ºå®ä¾‹");
+            Type typeFromHandle = typeof(IModApi);
+            MainAssembly = Assembly.LoadFrom(_path);
+            foreach (Type type in MainAssembly.GetTypes())
             {
-                if (_cInfo != null)
+                if (typeFromHandle.IsAssignableFrom(type))
                 {
-                    SignCardHandler.PlayerSign(_cInfo);
+                    //Log.Out("[MODS] Found ModAPI in " + System.IO.Path.GetFileName(keyValuePair.Key) + ", creating instance");
+                    ApiInstance = (Activator.CreateInstance(type) as IModApi);
+                    //return true;
                 }
-                else
+            }
+            //æ‰§è¡Œåˆå§‹åŒ–
+            ApiInstance.InitMod();
+        }
+
+        public static string getModDir()
+        {
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+            return Path.GetDirectoryName(path);
+        }
+
+
+        private static bool DownloadFile(string URL, string filename)
+        {
+            try
+            {
+                HttpWebRequest Myrq = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(URL);
+                HttpWebResponse myrp = (System.Net.HttpWebResponse)Myrq.GetResponse();
+                Stream st = myrp.GetResponseStream();
+                Stream so = new System.IO.FileStream(filename, System.IO.FileMode.Create);
+                byte[] by = new byte[1024];
+                int osize = st.Read(by, 0, (int)by.Length);
+                while (osize > 0)
                 {
-                    Log.Error("ChatHookExample: Argument _cInfo null on message: {0}", _msg);
+                    so.Write(by, 0, osize);
+                    osize = st.Read(by, 0, (int)by.Length);
                 }
+                so.Close();
+                st.Close();
+                myrp.Close();
+                Myrq.Abort();
+                return true;
+            }
+            catch (System.Exception e)
+            {
                 return false;
             }
-
-            return true;
         }
 
-        //ÓÎÏ·¼ÓÔØÍê±Ï´¥·¢ÊÂ¼ş
-        private static void GameStartDone()
-        {
-            //¼ì²éÎÄ¼ş¼Ğ
-            if (!Directory.Exists(API.ConfigPath))
-            {
-                Directory.CreateDirectory(API.ConfigPath);
-            }
-            //¼ÓÔØÖ÷ÅäÖÃĞÅÏ¢
-            LoadSignCardMainConfig.Load();
-            //¼ÓÔØ½±ÀøÅäÖÃĞÅÏ¢
-            LoadSignCardInfoConfig.Load();
-            //¼ÓÔØÍæ¼ÒÅäÖÃĞÅÏ¢
-            LoadSignCardPlayerConfig.Load();
-
-            //¼ì²éÎÄ¼ş¼Ğ
-            if (!Directory.Exists(string.Format("{0}/Logs/", API.ConfigPath)))
-            {
-                Directory.CreateDirectory(string.Format("{0}/Logs/", API.ConfigPath));
-            }
-
-        }
     }
 }

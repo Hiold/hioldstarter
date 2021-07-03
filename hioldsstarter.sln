@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Blend for Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hiolds7dtdSignCard", "hiolds7dtdSignCard.csproj", "{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hioldsstarter", "hioldsstarter.csproj", "{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +23,6 @@ Global
 		SolutionGuid = {57209900-F54F-4478-973E-02D7277EB7E1}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = 7dtd-server-fixes.csproj
+		StartupItem = hioldsstarter.csproj
 	EndGlobalSection
 EndGlobal

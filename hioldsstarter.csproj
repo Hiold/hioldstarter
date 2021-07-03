@@ -7,14 +7,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>hiolds7dtdSignCard</AssemblyName>
+    <AssemblyName>hioldsstarter</AssemblyName>
     <RootNamespace>HioldMod</RootNamespace>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Mods\hiolds7dtdSignCard_funcs\</OutputPath>
+    <OutputPath>..\bin\Mods\hioldsstarter_funcs\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -33,6 +33,7 @@
       <HintPath>..\7dtd-binaries\System.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
       <HintPath>D:\SteamLibrary\steamapps\common\7 Days To Die\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
@@ -58,14 +59,7 @@
   <ItemGroup>
     <Compile Include="src\AssemblyInfo.cs" />
     <Compile Include="src\API.cs" />
-    <Compile Include="src\ConfigTools\LoadSignCardPlayerConfig.cs" />
-    <Compile Include="src\ConfigTools\LoadSignCardMainConfig.cs" />
-    <Compile Include="src\ConfigTools\LoadSignCardInfoConfig.cs" />
-    <Compile Include="src\Serialize\CardAwordInfo.cs" />
-    <Compile Include="src\Serialize\ItemStackSerializable.cs" />
-    <Compile Include="src\Serialize\JsonUtils.cs" />
-    <Compile Include="src\UserTools\SignCardConfig.cs" />
-    <Compile Include="src\UserTools\SignCardHandler.cs" />
+    <Compile Include="src\HttpTools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -82,7 +76,5 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="src\SignCard\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
