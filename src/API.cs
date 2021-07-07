@@ -14,17 +14,23 @@ namespace HioldMod
         private static IModApi ApiInstance;
         public void InitMod()
         {
-            string version = HttpTools.HttpPost("http://qc.hiold.net:8081/hioldapi/version.json");
+            string version = "";
+            try
+            {
+                version = HttpTools.HttpPost("https://qc.hiold.net/hioldapi/modversion.json");
+            }
+            catch (Exception e)
+            {
+                Log.Out(e.Message);
+            }
             Log.Out("[HIOLD] 远程version信息：{0}", version);
-            Dictionary<string, string> versionRemote = HttpTools.stringToDic(version);
             //是否执行更新
             bool modhasUpdate = false;
-            bool apihasUpdate = false;
             //读取本地文件
             string txt = "";
             try
             {
-                StreamReader sr = new StreamReader(@AssemblyPath + "version.json");
+                StreamReader sr = new StreamReader(@AssemblyPath + "modversion.json");
                 while (!sr.EndOfStream)
                 {
                     string str = sr.ReadLine();
@@ -36,14 +42,15 @@ namespace HioldMod
             {
                 Log.Out("[HIOLD] 没有发现version信息，执行下载");
             }
+            Log.Out("[HIOLD] 本地version信息：{0}", txt);
             //校验本地文件
             //没有检测到文件，写入新文件 并执行更新
             if (txt.Equals("") || txt == null)
             {
                 modhasUpdate = true;
-                apihasUpdate = true;
                 //写入文件
-                using (StreamWriter sw = new StreamWriter(@AssemblyPath + "version.json", true))
+                File.Delete(AssemblyPath + "modversion.json");
+                using (StreamWriter sw = new StreamWriter(@AssemblyPath + "modversion.json", true))
                 {
                     sw.WriteLine(version);
                     sw.Flush();
@@ -51,46 +58,30 @@ namespace HioldMod
                 }
             }
 
-            //没有获取到更新信息不执行更新
-            if (versionRemote.Count <= 0)
-            {
-                modhasUpdate = false;
-                apihasUpdate = false;
-            }
+            
 
-            Dictionary<string, string> versionLocal = HttpTools.stringToDic(txt);
+
             //判断版本情况
-            if (versionRemote.Count > 0 && versionLocal.Count > 0)
+            if (version.Length > 0 && txt.Length > 0)
             {
                 //
-                if (versionRemote.TryGetValue("modversion", out string remoteModVersion))
+                try
                 {
-                    if (versionLocal.TryGetValue("modversion", out string localModVersion))
+                    if (version.Equals(txt))
                     {
-                        if (remoteModVersion.Equals(localModVersion))
-                        {
-                            modhasUpdate = false;
-                        }
-                        else
-                        {
-                            modhasUpdate = true;
-                        }
+                        modhasUpdate = false;
                     }
-                }
+                    else
+                    {
+                        modhasUpdate = true;
+                    }
 
-                if (versionRemote.TryGetValue("apiversion", out string remoteAPIVersion))
+
+                }
+                catch (Exception e)
                 {
-                    if (versionLocal.TryGetValue("apiversion", out string localAPIVersion))
-                    {
-                        if (remoteAPIVersion.Equals(localAPIVersion))
-                        {
-                            apihasUpdate = false;
-                        }
-                        else
-                        {
-                            apihasUpdate = true;
-                        }
-                    }
+                    Log.Out(e.Message);
+                    modhasUpdate = false;
                 }
             }
             //下载dll
@@ -98,32 +89,26 @@ namespace HioldMod
             {
                 Log.Out("[HIOLD] 检测到更新mod更新，正在下载");
                 //覆盖旧文件
-                if (DownloadFile("http://qc.hiold.net:8081/hioldapi/main.bin", AssemblyPath + "main.bin.new"))
+                if (DownloadFile("https://qc.hiold.net/hioldapi/main.bin", AssemblyPath + "main.bin.new"))
                 {
                     File.Delete(AssemblyPath + "main.bin");
                     File.Copy(AssemblyPath + "main.bin.new", AssemblyPath + "main.bin");
                     File.Delete(AssemblyPath + "main.bin.new");
+                    //写入文件
+                    File.Delete(AssemblyPath + "modversion.json");
+                    using (StreamWriter sw = new StreamWriter(@AssemblyPath + "modversion.json", true))
+                    {
+                        sw.WriteLine(version);
+                        sw.Flush();
+                        sw.Close();
+                    }
                 }
             }
             else
             {
                 Log.Out("[HIOLD] mod已为最新，不再更新");
             }
-            //下载api
-            if (apihasUpdate)
-            {
-                Log.Out("[HIOLD] 检测到更新api更新，正在下载");
-                if (DownloadFile("http://qc.hiold.net:8081/hioldapi/api.bin", AssemblyPath + "api.bin.new"))
-                {
-                    File.Delete(AssemblyPath + "api.bin");
-                    File.Copy(AssemblyPath + "api.bin.new", AssemblyPath + "api.bin");
-                    File.Delete(AssemblyPath + "api.bin.new");
-                }
-            }
-            else
-            {
-                Log.Out("[HIOLD] api已为最新，不再更新");
-            }
+
 
 
 
