@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Blend for Visual Studio Version 16
+# Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hioldsstarter", "hioldsstarter.csproj", "{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hioldsstarterTests", "..\hioldsstarterTests\hioldsstarterTests.csproj", "{B1701333-96EF-4FE8-9AF0-780FCFF6B10E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DA7F87-1A66-4920-AADA-6EAF1971F8D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1701333-96EF-4FE8-9AF0-780FCFF6B10E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1701333-96EF-4FE8-9AF0-780FCFF6B10E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1701333-96EF-4FE8-9AF0-780FCFF6B10E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1701333-96EF-4FE8-9AF0-780FCFF6B10E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
