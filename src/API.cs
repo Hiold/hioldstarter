@@ -85,30 +85,36 @@ namespace HioldMod
                 }
             }
             //下载dll
-            if (modhasUpdate)
+            try
             {
-                Log.Out("[HIOLD] 检测到更新mod更新，正在下载");
-                //覆盖旧文件
-                if (DownloadFile("https://qc.hiold.net/hioldapi/main.bin", AssemblyPath + "main.bin.new"))
+                if (modhasUpdate)
                 {
-                    File.Delete(AssemblyPath + "main.bin");
-                    File.Copy(AssemblyPath + "main.bin.new", AssemblyPath + "main.bin");
-                    File.Delete(AssemblyPath + "main.bin.new");
-                    //写入文件
-                    File.Delete(AssemblyPath + "modversion.json");
-                    using (StreamWriter sw = new StreamWriter(@AssemblyPath + "modversion.json", true))
+                    Log.Out("[HIOLD] 检测到更新mod更新，正在下载");
+                    //覆盖旧文件
+                    if (DownloadFile("https://qc.hiold.net/hioldapi/main.bin", AssemblyPath + "main.bin.new"))
                     {
-                        sw.WriteLine(version);
-                        sw.Flush();
-                        sw.Close();
+                        File.Delete(AssemblyPath + "main.bin");
+                        File.Copy(AssemblyPath + "main.bin.new", AssemblyPath + "main.bin");
+                        File.Delete(AssemblyPath + "main.bin.new");
+                        //写入文件
+                        File.Delete(AssemblyPath + "modversion.json");
+                        using (StreamWriter sw = new StreamWriter(@AssemblyPath + "modversion.json", true))
+                        {
+                            sw.WriteLine(version);
+                            sw.Flush();
+                            sw.Close();
+                        }
                     }
                 }
+                else
+                {
+                    Log.Out("[HIOLD] mod已为最新，不再更新");
+                }
             }
-            else
+            catch (Exception e)
             {
-                Log.Out("[HIOLD] mod已为最新，不再更新");
+                Log.Out("[HIOLD] mod更新遇到问题，错误信息：" + e.Message + "，请检查日志并反馈给作者");
             }
-
 
 
 
@@ -117,17 +123,40 @@ namespace HioldMod
             //赋值主文件进行加载
             try
             {
-                File.Delete(AssemblyPath + "main.dlc");
-                File.Copy(AssemblyPath + "main.bin", AssemblyPath + "main.dlc");
+                //删除老文件
+                String modFileName = "mh" + GetRandomString(16, true, true, true, false, null);
+
+
+
+                //删除文件
+                foreach (string fn in Directory.GetFiles(AssemblyPath))
+                {
+                    FileInfo fileInfo = new FileInfo(fn);
+                    //确定要删除的文件
+                    if (fileInfo.Name.Length == 18 && fileInfo.Name.StartsWith("mh"))
+                    {
+                        //尝试删除
+                        try
+                        {
+                            File.Delete(fileInfo.FullName);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Out("[HIOLD] 文件删除异常：" + e.Message + "");
+                        }
+                    }
+                }
+
+
+
+
+                File.Copy(AssemblyPath + "main.bin", AssemblyPath + modFileName);
                 //反射获取数据
-                LoadAssembly(AssemblyPath + "main.dlc");
+                LoadAssembly(AssemblyPath + modFileName);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                File.Delete(AssemblyPath + "main.dlc2");
-                File.Copy(AssemblyPath + "main.bin", AssemblyPath + "main.dlc2");
-                //反射获取数据
-                LoadAssembly(AssemblyPath + "main.dlc2");
+                Log.Out("[HIOLD] MOD加载异常：" + e.Message + "");
             }
         }
 
